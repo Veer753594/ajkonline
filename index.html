@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="आयुष जनसेवा केन्द्र — ऑनलाइन नागरिक सेवाएँ और डिजिटल प्रिंटिंग">
+  <title>Ayush Janseva Kendra | ऑनलाइन सेवा केन्द्र</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <div class="top-strip"><span>🇮🇳 Ayush Janseva Kendra</span><span>डिजिटल सेवाएँ • प्रिंटिंग • नागरिक सहायता</span></div>
+
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="Ayush Janseva Kendra home">
+      <img class="brand-logo" src="assets/images/ayush-logo.png" alt="Ayush Digital Services & Janseva Kendra logo">
+      <span><strong>Ayush Janseva Kendra</strong><small>ऑनलाइन सेवा केन्द्र</small></span>
+    </a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Open navigation" aria-expanded="false">☰</button>
+    <nav id="mainNav" class="main-nav">
+      <a href="#home">Home</a>
+      <a href="#services">Services</a>
+      <a href="#printing">Printing</a>
+      <a href="#track">Track Service</a>
+      <a href="#contact">Contact</a>
+      <a class="nav-login" href="#admin">Admin Login</a>
+    </nav>
+  </header>
+
+  <main id="home">
+    <section class="hero section">
+      <div class="hero-copy">
+        <span class="eyebrow">Trusted Digital Service Centre</span>
+        <h1>आपकी आवश्यक <span>जन सेवा</span> सेवाएँ, एक ही जगह।</h1>
+        <p>सेवा के लिए आवेदन करें, दस्तावेज़ जमा करें, अपने आवेदन की स्थिति देखें और एक ही पोर्टल से प्रोफेशनल प्रिंटिंग की सुविधा लें।</p>
+        <div class="hero-actions">
+          <a class="btn btn-gold" href="#apply">Apply for Service</a>
+          <a class="btn btn-outline" href="#track">Track Your Service</a>
+        </div>
+        <div class="trust-row">
+          <span>✓ मोबाइल के लिए अनुकूल</span><span>✓ पारदर्शी स्थिति</span><span>✓ सुरक्षित प्रक्रिया</span>
+        </div>
+      </div>
+      <div class="hero-panel">
+        <div class="flag-line"><i></i><i></i><i></i></div>
+        <div class="hero-card">
+          <span class="card-kicker">Fast Access</span>
+          <h2>What do you need today?</h2>
+          <button class="quick-item" data-scroll="#apply">📋 Online Services <b>→</b></button>
+          <button class="quick-item" data-scroll="#track">🔎 Track Application <b>→</b></button>
+          <button class="quick-item featured" data-scroll="#printing">🖨️ Digital Printing <b>→</b></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="quick section" aria-label="Quick services">
+      <article class="feature-card">
+        <div class="icon">📋</div><div><h3>Online Services</h3><p>Browse citizen services and start an application.</p></div>
+      </article>
+      <article class="feature-card">
+        <div class="icon">🔎</div><div><h3>Track Your Service</h3><p>Use your Service Number and Token Number.</p></div>
+      </article>
+      <article class="feature-card print-feature">
+        <div class="icon">🖨️</div><div><h3>Digital Printing</h3><p>Photo State, Photo Print and Document Print.</p></div>
+      </article>
+    </section>
+
+    <section class="section" id="services">
+      <div class="section-heading">
+        <div><span class="eyebrow">Services</span><h2>लोकप्रिय जन सेवा सेवाएँ</h2></div>
+        <div class="search-wrap"><span>⌕</span><input id="serviceSearch" type="search" placeholder="सेवाएँ खोजें..." aria-label="सेवाएँ खोजें"></div>
+      </div>
+      <div class="filters" id="filters"></div>
+      <div class="service-grid" id="serviceGrid"></div>
+      <p class="empty-state" id="serviceEmpty" hidden>No matching services found.</p>
+    </section>
+
+    <section class="printing section" id="printing">
+      <div class="section-heading">
+        <div><span class="eyebrow">Featured</span><h2>प्रोफेशनल डिजिटल प्रिंटिंग</h2><p>अंतिम प्रिंट की अनुमति से पहले भुगतान सत्यापन आवश्यक होगा।</p></div>
+      </div>
+      <div class="print-grid">
+        <article class="print-card"><span class="print-icon">📄</span><h3>Photo State</h3><p>Fast document photocopy with colour and copy options.</p><button class="text-btn" data-print="Photo State">Start Order →</button></article>
+        <article class="print-card gold-edge"><span class="print-icon">📸</span><h3>Photo Print</h3><p>Upload photos and choose the required print size and copies.</p><button class="text-btn" data-print="Photo Print">Start Order →</button></article>
+        <article class="print-card"><span class="print-icon">📑</span><h3>Document Print</h3><p>Print PDFs and supported documents with flexible settings.</p><button class="text-btn" data-print="Document Print">Start Order →</button></article>
+      </div>
+    </section>
+
+    <section class="print-order section" id="print-order">
+      <div class="section-heading"><div><span class="eyebrow">Print Order + Payment</span><h2>Print Order बनाएं</h2><p>पहले document review होगा, फिर print order बनेगा। Payment verification के बाद ही order print queue में जाएगा।</p></div></div>
+      <div class="print-order-box">
+        <div id="printStartPanel" class="print-start-panel">
+          <div><span class="eyebrow">पहला कदम</span><h3>पहले Print Application Submit करें</h3><p>Customer को Service Number या Token Number पहले से पता नहीं होना चाहिए। Customer Name और Mobile Number देकर application submit करें। System अपने-आप Service Number और Token Number generate करेगा।</p></div>
+          <button id="startPrintApplication" class="btn btn-gold" type="button">Start Print Application →</button>
+          <p class="form-message" id="printStartMessage" role="status"></p>
+        </div>
+        <div id="printSessionBox" class="print-session-box" hidden>
+          <div><span class="eyebrow">Your Print Application</span><h3>Application Details</h3><p>ये details system ने generate की हैं। Customer को इन्हें manually type करने की जरूरत नहीं है।</p></div>
+          <div class="print-session-details"><div><small>Service Number</small><b id="printServiceNumberDisplay">—</b></div><div><small>Token Number</small><b id="printTokenNumberDisplay">—</b></div></div>
+          <button id="loadApprovedDocuments" class="btn btn-gold" type="button">Load Approved Documents</button>
+          <p class="form-message" id="printLookupMessage" role="status"></p>
+          <input type="hidden" id="printServiceNumber"><input type="hidden" id="printTokenNumber">
+        </div>
+        <form id="printOrderForm" class="print-order-form" hidden novalidate>
+          <label>Document<select id="printFileId" required><option value="">Load documents first</option></select></label>
+          <label>Print Type<select id="printType"><option value="DOCUMENT_PRINT">Document Print</option><option value="PHOTOSTATE">Photo State</option><option value="PHOTO_PRINT">Photo Print</option></select></label>
+          <label>Colour<select id="printColor"><option value="BW">B&W</option><option value="COLOR">Color</option></select></label>
+          <label>Copies<input id="printCopies" type="number" min="1" max="999" value="1"></label>
+          <label>Paper Size<select id="printPaper"><option>A4</option><option>A5</option><option>4X6</option><option>5X7</option></select></label>
+          <label class="check-label"><input id="printDuplex" type="checkbox"> Double Side</label>
+          <button class="btn btn-gold" type="submit">Create Print Order</button>
+          <p class="form-message" id="printOrderMessage" role="status"></p>
+        </form>
+        <div id="paymentBox" class="payment-box" hidden>
+          <div><span class="eyebrow">Payment</span><h3>Payment करें</h3><p>Amount: <strong id="printAmount">₹0.00</strong></p></div>
+          <form id="paymentForm" class="payment-form" novalidate>
+            <label>Payment Method<select id="paymentMethod"><option value="UPI">UPI</option><option value="CASH">Cash at Centre</option><option value="GATEWAY">Online Gateway (coming soon)</option></select></label>
+            <label id="transactionWrap">UPI Transaction ID<input id="transactionId" maxlength="160" placeholder="Enter successful UPI transaction/reference ID"></label>
+            <button class="btn btn-gold" type="submit">Submit Payment</button>
+            <p class="form-message" id="paymentMessage" role="status"></p>
+          </form>
+          <div id="paymentStatus" class="payment-status" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="application section" id="apply">
+      <div class="section-heading"><div><span class="eyebrow">New Application</span><h2>Service के लिए आवेदन करें</h2><p>Application submit करने के बाद आपको Service Number और Token Number मिलेगा।</p></div></div>
+      <form id="applicationForm" class="application-form" novalidate>
+        <label>Service<select id="applicationService" required><option value="">Select Service</option></select></label>
+        <label>Customer Name<input id="customerName" required maxlength="160" placeholder="अपना नाम दर्ज करें"></label>
+        <label>Mobile Number<input id="customerMobile" required inputmode="numeric" maxlength="10" placeholder="10 digit mobile number"></label>
+        <button class="btn btn-gold" type="submit">Submit Application</button>
+        <p class="form-message" id="applicationMessage" role="status"></p>
+      </form>
+      <div class="application-result" id="applicationResult" hidden></div>
+      <div class="document-upload" id="documentUpload" hidden>
+        <div><span class="eyebrow">Document Upload</span><h3>आवश्यक Documents Upload करें</h3><p>आपके Service Number और Token Number से application verify होगा। PDF, JPG, JPEG या PNG files upload करें (अधिकतम 5 files, प्रत्येक 10 MB तक)।</p></div>
+        <form id="documentUploadForm" class="document-upload-form" enctype="multipart/form-data" novalidate>
+          <input type="hidden" id="uploadServiceNumber"><input type="hidden" id="uploadTokenNumber">
+          <label>Documents<input id="documentFiles" type="file" accept=".pdf,.jpg,.jpeg,.png" multiple required></label>
+          <button class="btn btn-gold" type="submit">Upload Documents</button>
+          <p class="form-message" id="documentUploadMessage" role="status"></p>
+        </form>
+      </div>
+
+    </section>
+
+    <section class="track section" id="track">
+      <div class="track-box">
+        <div class="track-copy"><span class="eyebrow">Live-ready tracking</span><h2>Track Your Service</h2><p>Customer login की आवश्यकता नहीं है। अपनी acknowledgement में दिए गए Service Number और Token Number दर्ज करें।</p></div>
+        <form id="trackForm" class="track-form" novalidate>
+          <label>Service Number<input id="serviceNumber" required placeholder="AJK-2026-XXXXX" autocomplete="off"></label>
+          <label>Token Number<input id="tokenNumber" required placeholder="XXXXXX" autocomplete="off"></label>
+          <button class="btn btn-gold" type="submit">Track Status</button>
+          <p class="form-message" id="trackMessage" role="status"></p>
+        </form>
+      </div>
+      <div class="tracking-result" id="trackingResult" hidden></div>
+    </section>
+
+    <section class="roles section" id="admin">
+      <div class="section-heading"><div><span class="eyebrow">Secure access</span><h2>पोर्टल प्रवेश</h2></div></div>
+      <div class="role-grid">
+        <article class="role-card"><span>🛡️</span><h3>Admin Portal</h3><p>Applications, services, printing, users और system settings को manage करें।</p><a href="admin.html" class="btn btn-outline">Admin Login</a></article>
+        <article class="role-card"><span>💰</span><h3>Account Manager</h3><p>Payment records, collections, receipts और financial reports को manage करें।</p><a href="admin.html" class="btn btn-outline">Account Manager Login</a></article>
+      </div>
+    </section>
+
+    <section class="contact section" id="contact">
+      <span class="eyebrow">Contact</span><h2>सहायता चाहिए?</h2><p>पूरी contact details और service-centre information अगले foundation milestone में configure की जाएगी।</p>
+    </section>
+  </main>
+
+  <footer><div><strong>Ayush Janseva Kendra</strong><span>ऑनलाइन सेवा केन्द्र</span></div><p>© 2026 Ayush Janseva Kendra. सर्वाधिकार सुरक्षित।</p></footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="hi">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin Portal | Ayush Janseva Kendra</title><link rel="stylesheet" href="assets/css/styles.css"></head>
+<body class="admin-page">
+<div class="top-strip"><span>🇮🇳 Ayush Janseva Kendra — Secure Management Portal</span><span>Admin / Account Manager</span></div>
+<header class="site-header"><a class="brand" href="index.html"><img class="brand-logo" src="assets/images/ayush-logo.png" alt="Ayush Janseva Kendra logo"><div><strong>Ayush Janseva Kendra</strong><small>Management Portal</small></div></a><a href="index.html" class="btn btn-outline">Back to Website</a></header>
+<main class="admin-shell">
+<section id="loginView" class="admin-login admin-card"><span class="eyebrow">Secure Login</span><h1>Portal Login</h1><p>Admin या Account Manager credentials से sign in करें।</p><form id="loginForm" class="admin-form" novalidate><label>Mobile / Email<input id="loginIdentifier" autocomplete="username" required placeholder="Mobile number or email"></label><label>Password<input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Password"></label><button class="btn btn-gold" type="submit">Sign In</button><p id="loginMessage" class="admin-message" role="status"></p></form></section>
+<section id="dashboardView" class="hidden">
+<div class="admin-top"><div class="admin-title"><span class="eyebrow">Operations</span><h1>Management Dashboard</h1><p id="whoami">Loading profile…</p></div><div class="admin-top-actions"><label class="check-label"><input id="autoPrintEnabled" type="checkbox" checked> Auto-open print dialog</label><button id="logoutBtn" class="btn btn-outline">Logout</button></div></div>
+<div class="admin-card">
+<div class="admin-toolbar"><label>Application Status <select id="statusFilter"><option value="">All</option><option>SUBMITTED</option><option>UNDER_REVIEW</option><option>DOCUMENTS_REQUIRED</option><option>PROCESSING</option><option>COMPLETED</option><option>REJECTED</option></select></label><button id="refreshBtn" class="mini-btn gold">Refresh</button></div>
+<p id="dashboardMessage" class="admin-message" role="status"></p><h3 class="admin-section-title">Applications</h3>
+<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Application</th><th>Customer</th><th>Service</th><th>Status</th><th>Documents</th><th>Update Status</th></tr></thead><tbody id="applicationRows"></tbody></table></div>
+</div>
+<div class="admin-card admin-subsection"><h3 class="admin-section-title">Payment Verification</h3><div class="admin-toolbar"><label>Payment Status <select id="paymentFilter"><option value="">All</option><option>PENDING</option><option>PROCESSING</option><option>SUCCESS</option><option>FAILED</option><option>REFUNDED</option></select></label><button id="paymentRefreshBtn" class="mini-btn gold">Refresh Payments</button></div><div class="admin-table-wrap"><table class="admin-table compact"><thead><tr><th>Application / Order</th><th>Customer</th><th>Amount</th><th>Method / Ref</th><th>Status</th><th>Verify</th></tr></thead><tbody id="paymentRows"></tbody></table></div></div>
+<div class="admin-card admin-subsection"><h3 class="admin-section-title">Print Queue</h3><div class="admin-table-wrap"><table class="admin-table compact"><thead><tr><th>Order</th><th>Document</th><th>Settings</th><th>Amount</th><th>Payment</th><th>Print Status</th><th>Print</th><th>Update</th></tr></thead><tbody id="printRows"></tbody></table></div></div>
+</section></main>
+<script src="assets/js/config.js"></script>
+  <script src="assets/js/admin.js" defer></script></body></html>

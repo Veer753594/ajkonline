@@ -1,0 +1,3 @@
+import { verifyToken } from './token.js';
+export function requireAuth(req,res,next){const header=String(req.headers.authorization||''); if(!header.startsWith('Bearer ')) return res.status(401).json({ok:false,error:'AUTH_REQUIRED'}); try{req.user=verifyToken(header.slice(7)); next();}catch{return res.status(401).json({ok:false,error:'INVALID_OR_EXPIRED_TOKEN'});}}
+export function requireRole(...roles){return(req,res,next)=>{if(!req.user)return res.status(401).json({ok:false,error:'AUTH_REQUIRED'});if(!roles.includes(req.user.role))return res.status(403).json({ok:false,error:'FORBIDDEN'});next();};}
