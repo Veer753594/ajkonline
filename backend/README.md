@@ -46,3 +46,11 @@ This is the Phase 8 order-level pricing foundation. Page-count-aware billing, ga
 - `POST /api/print-orders/:id/prepare-print` — ADMIN/ACCOUNT_MANAGER only; requires VERIFIED payment and returns an authenticated print URL.
 - `GET /api/documents/:id/print` — ADMIN/ACCOUNT_MANAGER only; streams an approved document inline with no-store headers.
 - `PATCH /api/print-orders/:id/status` records printed timestamp/user when status becomes PRINTED.
+
+
+## Supabase Storage
+- Customer documents are stored in the private Supabase Storage bucket configured by `SUPABASE_STORAGE_BUCKET` (default: `documents`).
+- Set `SUPABASE_URL` and the **server-only** `SUPABASE_SECRET_KEY` on the backend host.
+- Never expose `SUPABASE_SECRET_KEY` in frontend code, GitHub, Netlify environment variables, or browser requests.
+- The backend continues to enforce the 10 MB per-file and 5-file upload limits.
+- Document print/download routes retrieve files through the backend; the bucket remains private.
