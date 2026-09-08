@@ -3,5 +3,5 @@
  * Example: window.AJK_CONFIG = { API_BASE: "https://api.example.com/api" };
  */
 window.AJK_CONFIG = window.AJK_CONFIG || {
-  API_BASE: "/api"
+  API_BASE: "https://ajkonline-api.onrender.com/api"
 };
