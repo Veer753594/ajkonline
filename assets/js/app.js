@@ -33,7 +33,7 @@ async function loadServices(){
    const r=await fetch(`${API_BASE}/services`);
    const data=await r.json();
    if(!r.ok) throw new Error(data.error||"SERVICE_LOAD_FAILED");
-   serviceCatalog=data.services||[];
+   serviceCatalog=data.data||[];
    if(!serviceCatalog.length) throw new Error("EMPTY_SERVICE_CATALOG");
    backendAvailable=true;
    populateApplicationServices();
