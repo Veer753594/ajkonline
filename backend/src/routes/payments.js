@@ -5,10 +5,19 @@ import { query, pool } from '../db/pool.js';
 import { requireAuth, requireRole } from '../auth/middleware.js';
 
 const router=Router();
+
+const razorpay = () => {
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    throw new Error('RAZORPAY_NOT_CONFIGURED');
+  }
+
+  return new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET
+  });
+};
+
 const METHODS = ['UPI','CASH','GATEWAY'];
-const STATUSES = ['PENDING','PROCESSING','SUCCESS','FAILED','REFUNDED'];
-function clean(v, max){ return String(v ?? '').trim().slice(0,max); }
-function validRef(v){ return /^[A-Za-z0-9._:/-]{3,160}$/.test(v); }
 
 // Create a payment record. A real gateway is intentionally not called until gateway credentials are configured.
 router.post('/', async (req,res,next)=>{
