@@ -1,8 +1,10 @@
 import { Router } from 'express';
+import crypto from 'node:crypto';
+import Razorpay from 'razorpay';
 import { query, pool } from '../db/pool.js';
 import { requireAuth, requireRole } from '../auth/middleware.js';
 
-const router = Router();
+const router=Router();
 const METHODS = ['UPI','CASH','GATEWAY'];
 const STATUSES = ['PENDING','PROCESSING','SUCCESS','FAILED','REFUNDED'];
 function clean(v, max){ return String(v ?? '').trim().slice(0,max); }
