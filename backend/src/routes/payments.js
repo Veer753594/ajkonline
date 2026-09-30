@@ -49,6 +49,161 @@ router.post('/', async (req,res,next)=>{
     res.status(201).json({ok:true,payment:inserted.rows[0],message:method==='GATEWAY'?'Gateway integration is pending configuration.':'Payment submitted for admin verification.'});
   }catch(err){next(err);}
 });
+
+// RAZORPAY ORDER CREATE — START
+router.post('/razorpay/order', async (req,res,next)=>{
+  const printOrderId=clean(req.body.print_order_id,60);
+
+  if(!printOrderId){
+    return res.status(400).json({
+      ok:false,
+      error:'PRINT_ORDER_ID_REQUIRED'
+    });
+  }
+
+  try{
+    const order=await query(`
+      SELECT
+        po.id,
+        po.application_id,
+        po.amount,
+        po.payment_status,
+        po.print_status,
+        a.service_number,
+        a.token_number,
+        a.customer_name,
+        a.customer_mobile
+      FROM print_orders po
+      JOIN applications a ON a.id=po.application_id
+      WHERE po.id=$1
+      LIMIT 1
+    `,[printOrderId]);
+
+    if(!order.rowCount){
+      return res.status(404).json({
+        ok:false,
+        error:'PRINT_ORDER_NOT_FOUND'
+      });
+    }
+
+    const po=order.rows[0];
+
+    if(po.payment_status==='VERIFIED'){
+      return res.status(409).json({
+        ok:false,
+        error:'PRINT_ORDER_ALREADY_PAID'
+      });
+    }
+
+    if(po.print_status==='CANCELLED'){
+      return res.status(409).json({
+        ok:false,
+        error:'PRINT_ORDER_CANCELLED'
+      });
+    }
+
+    const amount=Number(po.amount);
+
+    if(!Number.isFinite(amount) || amount<1){
+      return res.status(400).json({
+        ok:false,
+        error:'INVALID_PAYMENT_AMOUNT'
+      });
+    }
+
+    const existing=await query(`
+      SELECT
+        id,
+        status,
+        amount,
+        payment_method,
+        transaction_id,
+        created_at
+      FROM payments
+      WHERE print_order_id=$1
+        AND payment_method='GATEWAY'
+        AND status IN ('PROCESSING','SUCCESS')
+      ORDER BY created_at DESC
+      LIMIT 1
+    `,[printOrderId]);
+
+    if(existing.rowCount){
+      return res.status(409).json({
+        ok:false,
+        error:'PAYMENT_ALREADY_EXISTS',
+        payment:existing.rows[0]
+      });
+    }
+
+    const gateway=razorpay();
+
+    const razorpayOrder=await gateway.orders.create({
+      amount:Math.round(amount*100),
+      currency:'INR',
+      receipt:`AJK-${po.id}`,
+      notes:{
+        print_order_id:String(po.id),
+        service_number:String(po.service_number),
+        token_number:String(po.token_number)
+      }
+    });
+
+    const inserted=await query(`
+      INSERT INTO payments(
+        application_id,
+        print_order_id,
+        amount,
+        payment_method,
+        transaction_id,
+        status
+      )
+      VALUES($1,$2,$3,'GATEWAY',$4,'PROCESSING')
+      RETURNING
+        id,
+        application_id,
+        print_order_id,
+        amount,
+        payment_method,
+        transaction_id,
+        status,
+        created_at
+    `,[
+      po.application_id,
+      po.id,
+      amount,
+      razorpayOrder.id
+    ]);
+
+    res.status(201).json({
+      ok:true,
+      razorpay:{
+        key_id:process.env.RAZORPAY_KEY_ID,
+        order_id:razorpayOrder.id,
+        amount:razorpayOrder.amount,
+        currency:razorpayOrder.currency
+      },
+      payment:inserted.rows[0],
+      print_order:{
+        id:po.id,
+        amount:amount,
+        service_number:po.service_number,
+        token_number:po.token_number
+      }
+    });
+
+  }catch(err){
+    if(err?.message==='RAZORPAY_NOT_CONFIGURED'){
+      return res.status(503).json({
+        ok:false,
+        error:'RAZORPAY_NOT_CONFIGURED'
+      });
+    }
+
+    next(err);
+  }
+});
+// RAZORPAY ORDER CREATE — END
+
 router.get('/', requireAuth, requireRole('ADMIN','ACCOUNT_MANAGER'), async (req,res,next)=>{
   try{
     const status=clean(req.query.status,30); const params=[]; let where='';
