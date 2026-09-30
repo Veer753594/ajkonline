@@ -204,6 +204,164 @@ router.post('/razorpay/order', async (req,res,next)=>{
 });
 // RAZORPAY ORDER CREATE — END
 
+// RAZORPAY PAYMENT VERIFY — START
+router.post('/razorpay/verify', async (req,res,next)=>{
+  const printOrderId=clean(req.body.print_order_id,60);
+  const razorpayOrderId=clean(req.body.razorpay_order_id,100);
+  const razorpayPaymentId=clean(req.body.razorpay_payment_id,100);
+  const razorpaySignature=clean(req.body.razorpay_signature,200);
+
+  if(!printOrderId || !razorpayOrderId || !razorpayPaymentId || !razorpaySignature){
+    return res.status(400).json({
+      ok:false,
+      error:'RAZORPAY_PAYMENT_DETAILS_REQUIRED'
+    });
+  }
+
+  try{
+    const order=await query(`
+      SELECT
+        po.id,
+        po.application_id,
+        po.amount,
+        po.payment_status,
+        po.print_status
+      FROM print_orders po
+      WHERE po.id=$1
+      LIMIT 1
+    `,[printOrderId]);
+
+    if(!order.rowCount){
+      return res.status(404).json({
+        ok:false,
+        error:'PRINT_ORDER_NOT_FOUND'
+      });
+    }
+
+    const po=order.rows[0];
+
+    if(po.payment_status==='VERIFIED'){
+      return res.status(409).json({
+        ok:false,
+        error:'PRINT_ORDER_ALREADY_PAID'
+      });
+    }
+
+    const payment=await query(`
+      SELECT
+        id,
+        status,
+        transaction_id
+      FROM payments
+      WHERE print_order_id=$1
+        AND payment_method='GATEWAY'
+      ORDER BY created_at DESC
+      LIMIT 1
+    `,[printOrderId]);
+
+    if(!payment.rowCount){
+      return res.status(404).json({
+        ok:false,
+        error:'GATEWAY_PAYMENT_NOT_FOUND'
+      });
+    }
+
+    const paymentRow=payment.rows[0];
+
+    if(paymentRow.transaction_id!==razorpayOrderId){
+      return res.status(400).json({
+        ok:false,
+        error:'RAZORPAY_ORDER_MISMATCH'
+      });
+    }
+
+    if(paymentRow.status==='SUCCESS'){
+      return res.status(409).json({
+        ok:false,
+        error:'PAYMENT_ALREADY_VERIFIED'
+      });
+    }
+
+    if(!process.env.RAZORPAY_KEY_SECRET){
+      return res.status(503).json({
+        ok:false,
+        error:'RAZORPAY_NOT_CONFIGURED'
+      });
+    }
+
+    const expectedSignature=crypto
+      .createHmac('sha256',process.env.RAZORPAY_KEY_SECRET)
+      .update(`${razorpayOrderId}|${razorpayPaymentId}`)
+      .digest('hex');
+
+    const signaturesMatch=
+      expectedSignature.length===razorpaySignature.length &&
+      crypto.timingSafeEqual(
+        Buffer.from(expectedSignature),
+        Buffer.from(razorpaySignature)
+      );
+
+    if(!signaturesMatch){
+      await query(`
+        UPDATE payments
+        SET status='FAILED'
+        WHERE id=$1
+      `,[paymentRow.id]);
+
+      return res.status(400).json({
+        ok:false,
+        error:'RAZORPAY_SIGNATURE_INVALID'
+      });
+    }
+
+    const client=await pool.connect();
+
+    try{
+      await client.query('BEGIN');
+
+      await client.query(`
+        UPDATE payments
+        SET
+          status='SUCCESS',
+          transaction_id=$1,
+          verified_at=NOW()
+        WHERE id=$2
+      `,[razorpayPaymentId,paymentRow.id]);
+
+      await client.query(`
+        UPDATE print_orders
+        SET
+          payment_status='VERIFIED',
+          print_status='QUEUED',
+          updated_at=NOW()
+        WHERE id=$1
+      `,[printOrderId]);
+
+      await client.query('COMMIT');
+    }catch(err){
+      await client.query('ROLLBACK').catch(()=>{});
+      throw err;
+    }finally{
+      client.release();
+    }
+
+    res.json({
+      ok:true,
+      verified:true,
+      payment_status:'SUCCESS',
+      print_order:{
+        id:printOrderId,
+        payment_status:'VERIFIED',
+        print_status:'QUEUED'
+      }
+    });
+
+  }catch(err){
+    next(err);
+  }
+});
+// RAZORPAY PAYMENT VERIFY — END
+
 router.get('/', requireAuth, requireRole('ADMIN','ACCOUNT_MANAGER'), async (req,res,next)=>{
   try{
     const status=clean(req.query.status,30); const params=[]; let where='';
