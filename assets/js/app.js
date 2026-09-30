@@ -1,10 +1,10 @@
 const services=[
- {name:"Income Certificate",category:"Government",icon:"📄",price:"₹50",desc:"Apply for an income certificate through the centre."},
- {name:"Caste Certificate",category:"Government",icon:"🪪",price:"₹50",desc:"Assistance with caste certificate application."},
- {name:"Residence Certificate",category:"Government",icon:"🏠",price:"₹50",desc:"Apply for a residence/domicile certificate."},
- {name:"PAN Services",category:"Documents",icon:"💳",price:"From ₹110",desc:"PAN application and related assistance."},
- {name:"Online Form Filling",category:"Online Services",icon:"📝",price:"From ₹30",desc:"Professional online form filling assistance."},
- {name:"Education Forms",category:"Education",icon:"🎓",price:"From ₹30",desc:"Online education and examination form assistance."},
+ {name:"Income Certificate",category:"Government",icon:"📄",price:"₹100",desc:"Apply for an income certificate through the centre."},
+ {name:"Caste Certificate",category:"Government",icon:"🪪",price:"₹100",desc:"Assistance with caste certificate application."},
+ {name:"Residence Certificate",category:"Government",icon:"🏠",price:"₹100",desc:"Apply for a residence/domicile certificate."},
+ {name:"PAN Services",category:"Documents",icon:"💳",price:"From ₹150",desc:"PAN application and related assistance."},
+ {name:"Online Form Filling",category:"Online Services",icon:"📝",price:"From ₹100",desc:"Professional online form filling assistance."},
+ {name:"Education Forms",category:"Education",icon:"🎓",price:"From ₹150",desc:"Online education and examination form assistance."},
  {name:"Banking Assistance",category:"Banking",icon:"🏦",price:"As applicable",desc:"Digital banking and citizen-service assistance."},
  {name:"Photo & Document Printing",category:"Printing",icon:"🖨️",price:"From ₹5",desc:"Photo state, photo print and document print."},
  {name:"Transport Services",category:"Other",icon:"🚗",price:"As applicable",desc:"Online transport-related application assistance."}
