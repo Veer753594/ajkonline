@@ -183,8 +183,144 @@ printOrderForm.addEventListener("submit",async e=>{
 });
 $("#paymentMethod").addEventListener("change",()=>{$("#transactionWrap").hidden=$("#paymentMethod").value!=="UPI";});
 $("#paymentForm").addEventListener("submit",async e=>{
- e.preventDefault();const msg=$("#paymentMessage");if(!activePrintOrder){msg.textContent="पहले print order बनाएं।";return;}const method=$("#paymentMethod").value, transaction_id=$("#transactionId").value.trim();if(method==="GATEWAY"){msg.textContent="Online Gateway अभी configure नहीं हुआ है। Gateway details मिलने के बाद activate किया जाएगा।";return;}if(method==="UPI"&&!transaction_id){msg.textContent="UPI Transaction ID दर्ज करें।";return;}msg.textContent="Payment submit हो रहा है...";
- try{const r=await fetch(`${API_BASE}/payments`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({print_order_id:activePrintOrder.id,payment_method:method,transaction_id})});const data=await r.json();if(!r.ok)throw new Error(data.error||"PAYMENT_FAILED");msg.textContent=data.message;startPaymentPolling();}catch(err){msg.textContent=err.message==="PAYMENT_ALREADY_EXISTS"?"इस order का payment पहले से submit है।":"Payment submit नहीं हुआ। दोबारा प्रयास करें.";}
+ e.preventDefault();
+
+ const msg=$("#paymentMessage");
+
+ if(!activePrintOrder){
+   msg.textContent="पहले print order बनाएं।";
+   return;
+ }
+
+ const method=$("#paymentMethod").value;
+
+ if(method==="GATEWAY"){
+   msg.textContent="Razorpay payment शुरू हो रहा है...";
+
+   try{
+     const r=await fetch(`${API_BASE}/payments/razorpay/order`,{
+       method:"POST",
+       headers:{"Content-Type":"application/json"},
+       body:JSON.stringify({
+         print_order_id:activePrintOrder.id
+       })
+     });
+
+     const data=await r.json();
+
+     if(!r.ok){
+       throw new Error(data.error||"RAZORPAY_ORDER_FAILED");
+     }
+
+     if(typeof Razorpay==="undefined"){
+       throw new Error("RAZORPAY_CHECKOUT_NOT_LOADED");
+     }
+
+     const options={
+       key:data.razorpay.key_id,
+       amount:data.razorpay.amount,
+       currency:data.razorpay.currency,
+       name:"Ayush Janseva Kendra",
+       description:"Print Order Payment",
+       order_id:data.razorpay.order_id,
+
+       handler:async function(response){
+         msg.textContent="Payment verify हो रहा है...";
+
+         try{
+           const verifyResponse=await fetch(`${API_BASE}/payments/razorpay/verify`,{
+             method:"POST",
+             headers:{"Content-Type":"application/json"},
+             body:JSON.stringify({
+               print_order_id:activePrintOrder.id,
+               razorpay_order_id:response.razorpay_order_id,
+               razorpay_payment_id:response.razorpay_payment_id,
+               razorpay_signature:response.razorpay_signature
+             })
+           });
+
+           const verifyData=await verifyResponse.json();
+
+           if(!verifyResponse.ok){
+             throw new Error(verifyData.error||"RAZORPAY_VERIFY_FAILED");
+           }
+
+           msg.textContent="Payment verified ✓. Print order queue में चला गया है.";
+           startPaymentPolling();
+
+         }catch(err){
+           msg.textContent="Payment verify नहीं हुआ। कृपया Admin से संपर्क करें.";
+         }
+       },
+
+       modal:{
+         ondismiss:function(){
+           msg.textContent="Payment window बंद कर दी गई.";
+         }
+       },
+
+       theme:{
+         color:"#d4af37"
+       }
+     };
+
+     const checkout=new Razorpay(options);
+
+     checkout.on("payment.failed",function(response){
+       msg.textContent="Payment failed. कृपया दोबारा प्रयास करें.";
+     });
+
+     checkout.open();
+
+   }catch(err){
+     if(err.message==="PRINT_ORDER_ALREADY_PAID"){
+       msg.textContent="इस order का payment पहले ही हो चुका है.";
+     }else if(err.message==="RAZORPAY_NOT_CONFIGURED"){
+       msg.textContent="Razorpay अभी configure नहीं हुआ है.";
+     }else if(err.message==="RAZORPAY_CHECKOUT_NOT_LOADED"){
+       msg.textContent="Razorpay Checkout load नहीं हुआ. अगला step required है.";
+     }else{
+       msg.textContent="Razorpay payment शुरू नहीं हुआ. कृपया दोबारा प्रयास करें.";
+     }
+   }
+
+   return;
+ }
+
+ const transaction_id=$("#transactionId").value.trim();
+
+ if(method==="UPI"&&!transaction_id){
+   msg.textContent="UPI Transaction ID दर्ज करें।";
+   return;
+ }
+
+ msg.textContent="Payment submit हो रहा है...";
+
+ try{
+   const r=await fetch(`${API_BASE}/payments`,{
+     method:"POST",
+     headers:{"Content-Type":"application/json"},
+     body:JSON.stringify({
+       print_order_id:activePrintOrder.id,
+       payment_method:method,
+       transaction_id
+     })
+   });
+
+   const data=await r.json();
+
+   if(!r.ok){
+     throw new Error(data.error||"PAYMENT_FAILED");
+   }
+
+   msg.textContent=data.message;
+   startPaymentPolling();
+
+ }catch(err){
+   msg.textContent=err.message==="PAYMENT_ALREADY_EXISTS"
+     ?"इस order का payment पहले से submit है।"
+     :"Payment submit नहीं हुआ। दोबारा प्रयास करें.";
+ }
 });
 async function pollPrintStatus(){if(!activePrintOrder)return;const {service_number,token_number}=printDetails();try{const r=await fetch(`${API_BASE}/print-orders/status`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service_number,token_number,print_order_id:activePrintOrder.id})});const data=await r.json();if(!r.ok)return;const p=data.payment;$("#paymentStatus").hidden=false;$("#paymentStatus").innerHTML=`<b>Payment:</b> ${p?p.status:"NOT SUBMITTED"} &nbsp; <b>Print:</b> ${data.print_order.print_status}`;if(p?.status==="SUCCESS"){$("#paymentMessage").textContent="Payment verified ✓. Order print queue में चला गया है. Browser auto-print अगली phase में activate होगा.";return true;}}catch{}return false;}
 function startPaymentPolling(){clearInterval(startPaymentPolling.timer);pollPrintStatus();startPaymentPolling.timer=setInterval(async()=>{if(await pollPrintStatus())clearInterval(startPaymentPolling.timer);},5000);}
