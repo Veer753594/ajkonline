@@ -6,6 +6,17 @@ import { requireAuth, requireRole } from '../auth/middleware.js';
 
 const router=Router();
 
+const METHODS = ['UPI','CASH','GATEWAY'];
+const STATUSES = ['PENDING','PROCESSING','SUCCESS','FAILED','REFUNDED'];
+
+function clean(v, max){
+  return String(v ?? '').trim().slice(0, max);
+}
+
+function validRef(v){
+  return /^[A-Za-z0-9._:/-]{3,160}$/.test(v);
+}
+
 const razorpay = () => {
   if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
     throw new Error('RAZORPAY_NOT_CONFIGURED');
