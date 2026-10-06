@@ -6,7 +6,6 @@ import { requireAuth, requireRole } from '../auth/middleware.js';
 
 const router=Router();
 
-const METHODS = ['UPI','CASH','GATEWAY'];
 const STATUSES = ['PENDING','PROCESSING','SUCCESS','FAILED','REFUNDED'];
 
 function clean(v, max){
