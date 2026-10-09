@@ -181,7 +181,18 @@ printOrderForm.addEventListener("submit",async e=>{
  if(!file_id){msg.textContent="Approved document select करें।";return;} msg.textContent="Print order बनाया जा रहा है...";
  try{const body={service_number,token_number,file_id,print_type:$("#printType").value,color_mode:$("#printColor").value,copies:Number($("#printCopies").value),paper_size:$("#printPaper").value,paper_type:"Plain",duplex:$("#printDuplex").checked};const r=await fetch(`${API_BASE}/print-orders`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});const data=await r.json();if(!r.ok)throw new Error(data.error||"ORDER_FAILED");activePrintOrder=data.print_order;$("#printAmount").textContent=`₹${Number(activePrintOrder.amount).toFixed(2)}`;paymentBox.hidden=false;msg.textContent=`Print Order ${activePrintOrder.id.slice(0,8)}… created. अब payment submit करें.`;paymentBox.scrollIntoView({behavior:"smooth",block:"center"});}catch(err){msg.textContent=err.message==="DOCUMENT_NOT_APPROVED"?"Document अभी approved नहीं है।":"Print order create नहीं हुआ। Details जाँचें.";}
 });
-$("#paymentMethod").addEventListener("change",()=>{$("#transactionWrap").hidden=$("#paymentMethod").value!=="UPI";});
+
+function updateTransactionVisibility(){
+  const method=$("#paymentMethod").value;
+  const transactionWrap=$("#transactionWrap");
+  const transactionInput=$("#transactionId");
+
+  transactionWrap.hidden=method!=="UPI";
+  transactionInput.required=method==="UPI";
+}
+
+$("#paymentMethod").addEventListener("change",updateTransactionVisibility);
+updateTransactionVisibility();
 $("#paymentForm").addEventListener("submit",async e=>{
  e.preventDefault();
 
