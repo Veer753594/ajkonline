@@ -80,7 +80,7 @@ router.patch('/:id/status',requireAuth,requireRole('ADMIN','ACCOUNT_MANAGER'),as
    const from=current.rows[0];
    if(status==='PRINTING' && from.payment_status!=='VERIFIED') return res.status(409).json({ok:false,error:'PAYMENT_NOT_VERIFIED'});
    if(status==='PRINTED' && from.print_status!=='PRINTING') return res.status(409).json({ok:false,error:'PRINT_ORDER_NOT_PRINTING'});
-   const r=await query(`UPDATE print_orders SET print_status=$1,updated_at=NOW(),printed_at=CASE WHEN $1='PRINTED' THEN NOW() ELSE printed_at END,printed_by=CASE WHEN $1='PRINTED' THEN $3 ELSE printed_by END WHERE id=$2 RETURNING id,print_status,updated_at,printed_at`,[status,req.params.id,req.user.id]);
+   const r=await query(`UPDATE print_orders SET print_status=$1::varchar,updated_at=NOW(),printed_at=CASE WHEN $1::varchar='PRINTED' THEN NOW() ELSE printed_at END,printed_by=CASE WHEN $1::varchar='PRINTED' THEN $3 ELSE printed_by END WHERE id=$2 RETURNING id,print_status,updated_at,printed_at`,[status,req.params.id,req.user.id]);
    res.json({ok:true,print_order:r.rows[0]});
  }catch(err){next(err);}
 });
