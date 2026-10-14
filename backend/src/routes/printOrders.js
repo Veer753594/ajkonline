@@ -68,7 +68,7 @@ router.post('/:id/prepare-print',requireAuth,requireRole('ADMIN','ACCOUNT_MANAGE
     if(o.payment_status!=='VERIFIED')return res.status(409).json({ok:false,error:'PAYMENT_NOT_VERIFIED'});
     if(['CANCELLED','FAILED','PRINTED'].includes(o.print_status))return res.status(409).json({ok:false,error:'PRINT_ORDER_NOT_PRINTABLE'});
     const updated=await query(`UPDATE print_orders SET print_status='PRINTING',print_attempts=COALESCE(print_attempts,0)+1,last_print_attempt_at=NOW(),updated_at=NOW() WHERE id=$1 RETURNING id,print_status,print_attempts,last_print_attempt_at`,[req.params.id]);
-    res.json({ok:true,print_job:{...updated.rows[0],file_id:o.file_id,original_name:o.original_name,file_type:o.file_type,service_number:o.service_number,token_number:o.token_number,print_url:`/api/documents/${o.file_id}/print`}});
+    res.json({ok:true,print_job:{...updated.rows[0],file_id:o.file_id,original_name:o.original_name,file_type:o.file_type,service_number:o.service_number,token_number:o.token_number,print_url:`/documents/${o.file_id}/print`}});
   } catch(err){next(err);}
 });
 
