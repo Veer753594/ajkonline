@@ -10,7 +10,8 @@ const validStatus = (value) => ['ACTIVE', 'DISABLED'].includes(value);
 router.get('/', async (_req, res, next) => {
   try {
     const { rows } = await query(`
-      SELECT s.id, s.name, s.slug, s.description, s.base_price, s.status,
+      SELECT s.id, s.name, s.slug, s.description, s.base_price, s.price_label,
+             s.pricing_confirmed, s.required_documents, s.status,
              c.name AS category, c.slug AS category_slug
       FROM services s
       JOIN service_categories c ON c.id = s.category_id
@@ -63,7 +64,7 @@ router.patch('/:id', requireAuth, requireRole('ADMIN'), async (req, res, next) =
 
     const result = await query(`
       UPDATE services
-      SET name = $1, description = $2, base_base_price = $3, status = $4, updated_at = NOW()
+      SET name = $1, description = $2, base_price = $3, status = $4, updated_at = NOW()
       WHERE id = $5
       RETURNING id, name, slug, description, base_price, status
     `, [name, description, price, status, id]);
