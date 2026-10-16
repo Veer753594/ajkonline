@@ -1,4 +1,4 @@
-const services=[
+let services=[
  {name:"Income Certificate",category:"Government",icon:"📄",price:"₹100",desc:"Apply for an income certificate through the centre."},
  {name:"Caste Certificate",category:"Government",icon:"🪪",price:"₹100",desc:"Assistance with caste certificate application."},
  {name:"Residence Certificate",category:"Government",icon:"🏠",price:"₹100",desc:"Apply for a residence/domicile certificate."},
@@ -36,7 +36,19 @@ async function loadServices(){
    serviceCatalog=data.data||[];
    if(!serviceCatalog.length) throw new Error("EMPTY_SERVICE_CATALOG");
    backendAvailable=true;
+   // Render the database catalogue on the public service cards too.
+   services=serviceCatalog.map(s=>({
+     id:s.id,
+     name:s.name,
+     category:s.category||"Other",
+     icon:"📄",
+     price:s.price_label||(s.pricing_confirmed===false?"रेट जल्द निर्धारित होगा":`₹${Number(s.base_price||0).toLocaleString("en-IN")}`),
+     desc:s.description||"",
+     required_documents:Array.isArray(s.required_documents)?s.required_documents:[]
+   }));
    populateApplicationServices();
+   renderFilters();
+   renderServices();
  }catch(err){
    // Fallback catalogue for the public website. These are display/demo IDs;
    // real application submission uses database service IDs when the backend is connected.
@@ -63,8 +75,8 @@ function renderFilters(){
 }
 function renderServices(category="All",query=""){
  const q=query.trim().toLowerCase();
- const list=services.filter(s=>(category==="All"||s.category===category)&&(!q||`${s.name} ${s.category} ${s.desc}`.toLowerCase().includes(q)));
- grid.innerHTML=list.map(s=>`<article class="service-card"><span class="service-icon">${s.icon}</span><h3>${s.name}</h3><p>${s.desc}</p><div class="service-meta"><span class="price">${s.price}</span><button class="small-btn" data-service="${s.name}">Apply Now</button></div></article>`).join("");
+ const list=services.filter(s=>(category==="All"||s.category===category)&&(!q||`${s.name} ${s.category} ${s.desc} ${(s.required_documents||[]).join(" ")}`.toLowerCase().includes(q)));
+ grid.innerHTML=list.map(s=>`<article class="service-card"><span class="service-icon">${s.icon}</span><h3>${s.name}</h3><p>${s.desc}</p>${s.required_documents?.length?`<p class="service-docs"><strong>आवश्यक दस्तावेज़:</strong> ${s.required_documents.join("، ")}</p>`:""}<div class="service-meta"><span class="price">${s.price}</span><button class="small-btn" data-service="${s.name}">Apply Now</button></div></article>`).join("");
  $("#serviceEmpty").hidden=list.length!==0;
 }
 renderFilters(); renderServices();
