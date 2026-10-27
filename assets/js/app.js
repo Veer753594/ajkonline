@@ -89,6 +89,18 @@ grid.addEventListener("click",e=>{
  if(b){ const match=serviceCatalog.find(s=>s.name===b.dataset.service); if(match){$("#applicationService").value=match.id; document.querySelector("#apply")?.scrollIntoView({behavior:"smooth"});} else showToast(`${b.dataset.service} selected.`); }
 });
 
+function renderRequiredDocumentInputs(requiredDocuments){
+ const holder=$("#documentFields");
+ if(!holder)return;
+ const docs=Array.isArray(requiredDocuments)?requiredDocuments.map(x=>String(x||"").trim()).filter(Boolean):[];
+ if(!docs.length){
+   holder.innerHTML='<p class="form-message">इस सेवा के लिए आवश्यक दस्तावेज़ों की सूची अभी निर्धारित नहीं है। कृपया केन्द्र से पुष्टि करें।</p>';
+   return;
+ }
+ holder.innerHTML=docs.map((name,i)=>'<label>'+escapeHtml(name)+'<input type="file" class="required-document-file" data-document-label="'+escapeHtml(name)+'" accept=".pdf,.jpg,.jpeg,.png"></label>').join("");
+}
+function escapeHtml(value){return String(value??"").replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+
 function savePrintApplication(a){
   localStorage.setItem("AJK_PRINT_APPLICATION",JSON.stringify({service_number:a.service_number,token_number:a.token_number,customer_name:a.customer_name,customer_mobile:a.customer_mobile}));
   setPrintApplication(a.service_number,a.token_number);
@@ -136,6 +148,8 @@ $("#applicationForm").addEventListener("submit",async e=>{
    const r=await fetch(`${API_BASE}/applications`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service_id,customer_name,customer_mobile})});
    const data=await r.json(); if(!r.ok) throw new Error(data.error||"SUBMIT_FAILED");
    const a=data.application;
+   const selectedService=serviceCatalog.find(s=>String(s.id)===String(service_id));
+   renderRequiredDocumentInputs(selectedService?.required_documents||[]);
    msg.textContent="Application successfully submitted.";
    out.hidden=false;
    out.innerHTML=`<strong>Application Submitted ✓</strong><p>Service Number: <b>${a.service_number}</b><br>Token Number: <b>${a.token_number}</b><br>Status: <b>${a.status}</b></p><small>इन दोनों numbers को सुरक्षित रखें। इन्हीं से Track Your Service और Document Upload किया जा सकता है।</small>`;
@@ -150,22 +164,24 @@ $("#applicationForm").addEventListener("submit",async e=>{
 
 $("#documentUploadForm").addEventListener("submit",async e=>{
  e.preventDefault();
- const input=$("#documentFiles"), msg=$("#documentUploadMessage");
- const files=Array.from(input.files||[]);
- if(!files.length){msg.textContent="कम से कम एक document चुनें।";return;}
- if(files.length>5){msg.textContent="एक बार में अधिकतम 5 files upload करें।";return;}
+ const fields=Array.from(document.querySelectorAll(".required-document-file"));
+ const chosen=fields.filter(input=>input.files&&input.files[0]);
+ const msg=$("#documentUploadMessage");
+ const files=chosen.map(input=>({file:input.files[0],label:input.dataset.documentLabel||"Document"}));
+ if(!files.length){msg.textContent="कम से कम एक आवश्यक दस्तावेज़ की फ़ाइल चुनें।";return;}
+ if(files.length>15){msg.textContent="एक बार में अधिकतम 15 files upload करें।";return;}
  if(!backendAvailable){msg.textContent="Backend API connected नहीं है। पहले API connection configure करें।";return;}
- if(files.some(f=>f.size>10*1024*1024)){msg.textContent="हर file का size 10 MB या उससे कम होना चाहिए।";return;}
+ if(files.some(item=>item.file.size>10*1024*1024)){msg.textContent="हर file का size 10 MB या उससे कम होना चाहिए।";return;}
  msg.textContent="Documents upload हो रहे हैं...";
  const form=new FormData();
  form.append("service_number",$("#uploadServiceNumber").value);
  form.append("token_number",$("#uploadTokenNumber").value);
- files.forEach(f=>form.append("files",f));
+ files.forEach(item=>{form.append("files",item.file);form.append("document_labels",item.label);});
  try{
    const r=await fetch(`${API_BASE}/documents`,{method:"POST",body:form});
    const data=await r.json(); if(!r.ok) throw new Error(data.error||"UPLOAD_FAILED");
    msg.textContent=`${data.documents.length} document(s) successfully uploaded. Centre team review करेगी.`;
-   input.value="";
+   fields.forEach(input=>{input.value="";});
  }catch(err){msg.textContent=err.message==="APPLICATION_NOT_FOUND"?"Application नहीं मिली। Service Number और Token Number जाँचें।":"Document upload नहीं हुआ। File type/size जाँचें और दोबारा प्रयास करें।";}
 });
 
