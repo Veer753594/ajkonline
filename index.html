@@ -134,10 +134,10 @@
       </form>
       <div class="application-result" id="applicationResult" hidden></div>
       <div class="document-upload" id="documentUpload" hidden>
-        <div><span class="eyebrow">Document Upload</span><h3>आवश्यक Documents Upload करें</h3><p>आपके Service Number और Token Number से application verify होगा। PDF, JPG, JPEG या PNG files upload करें (अधिकतम 5 files, प्रत्येक 10 MB तक)।</p></div>
+        <div><span class="eyebrow">Document Upload</span><h3>आवश्यक Documents Upload करें</h3><p>हर आवश्यक दस्तावेज़ के सामने उसी दस्तावेज़ की PDF/JPG/PNG फ़ाइल चुनें। प्रत्येक फ़ाइल अधिकतम 10 MB तक।</p></div>
         <form id="documentUploadForm" class="document-upload-form" enctype="multipart/form-data" novalidate>
           <input type="hidden" id="uploadServiceNumber"><input type="hidden" id="uploadTokenNumber">
-          <label>Documents<input id="documentFiles" type="file" accept=".pdf,.jpg,.jpeg,.png" multiple required></label>
+          <div id="documentFields" class="document-fields"></div>
           <button class="btn btn-gold" type="submit">Upload Documents</button>
           <p class="form-message" id="documentUploadMessage" role="status"></p>
         </form>
