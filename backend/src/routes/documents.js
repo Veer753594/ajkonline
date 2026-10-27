@@ -71,6 +71,7 @@ function publicDocument(row) {
   return {
     id: row.id,
     original_name: row.original_name,
+    document_label: row.document_label || null,
     file_type: row.file_type,
     file_size: Number(row.file_size),
     review_status: row.review_status,
@@ -94,6 +95,8 @@ router.post('/', upload.array('files', 5), async (req, res, next) => {
   const serviceNumber = clean(req.body.service_number, 40).toUpperCase();
   const tokenNumber = clean(req.body.token_number, 40);
   const files = req.files || [];
+  const rawLabels = req.body.document_labels;
+  const labels = Array.isArray(rawLabels) ? rawLabels : rawLabels ? [rawLabels] : [];
 
   if (!supabase) {
     return res.status(503).json({ ok: false, error: 'STORAGE_NOT_CONFIGURED' });
@@ -128,7 +131,9 @@ router.post('/', upload.array('files', 5), async (req, res, next) => {
       const ext = path.extname(file.originalname).toLowerCase();
       const storagePath = `${app.rows[0].id}/${randomUUID()}${ext}`;
 
-      return { file, fileType, storagePath };
+      const index = files.indexOf(file);
+      const documentLabel = clean(labels[index] || '', 160) || path.basename(file.originalname, ext).slice(0, 160);
+      return { file, fileType, storagePath, documentLabel };
     });
 
     for (const item of prepared) {
@@ -153,12 +158,13 @@ router.post('/', upload.array('files', 5), async (req, res, next) => {
       for (const item of prepared) {
         const inserted = await query(
           `INSERT INTO documents
-            (application_id,original_name,stored_name,file_type,file_size,storage_path,review_status)
-           VALUES($1,$2,$3,$4,$5,$6,'PENDING')
-           RETURNING id,original_name,file_type,file_size,review_status,review_note,uploaded_at,reviewed_at`,
+            (application_id,original_name,document_label,stored_name,file_type,file_size,storage_path,review_status)
+           VALUES($1,$2,$3,$4,$5,$6,$7,'PENDING')
+           RETURNING id,original_name,document_label,file_type,file_size,review_status,review_note,uploaded_at,reviewed_at`,
           [
             app.rows[0].id,
             item.file.originalname.slice(0, 255),
+            item.documentLabel,
             item.storagePath,
             item.fileType,
             item.file.size,
@@ -193,7 +199,7 @@ router.post('/', upload.array('files', 5), async (req, res, next) => {
 router.get('/application/:applicationId', requireAuth, requireRole('ADMIN', 'ACCOUNT_MANAGER'), async (req, res, next) => {
   try {
     const result = await query(
-      `SELECT id,original_name,file_type,file_size,review_status,review_note,uploaded_at,reviewed_at
+      `SELECT id,original_name,document_label,file_type,file_size,review_status,review_note,uploaded_at,reviewed_at
        FROM documents
        WHERE application_id=$1
        ORDER BY uploaded_at DESC`,
