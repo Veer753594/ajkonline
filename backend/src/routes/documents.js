@@ -28,7 +28,7 @@ const ALLOWED_EXTENSIONS = new Set(['.pdf', '.jpg', '.jpeg', '.png']);
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: MAX_FILE_SIZE, files: 5 },
+  limits: { fileSize: MAX_FILE_SIZE, files: 15 },
   fileFilter: (_req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
     if (!ALLOWED_EXTENSIONS.has(ext)) return cb(new Error('Invalid file type'));
@@ -91,7 +91,7 @@ async function removeStorageObjects(paths) {
 }
 
 // Customer upload: the Service Number + Token Number act as the application acknowledgement.
-router.post('/', upload.array('files', 5), async (req, res, next) => {
+router.post('/', upload.array('files', 15), async (req, res, next) => {
   const serviceNumber = clean(req.body.service_number, 40).toUpperCase();
   const tokenNumber = clean(req.body.token_number, 40);
   const files = req.files || [];
