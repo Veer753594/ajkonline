@@ -41,7 +41,7 @@ async function loadServices(){
      id:s.id,
      name:s.name,
      category:s.category||"Other",
-     icon:"📄",
+     icon:serviceIcon(s.category, s.name),
      price:s.price_label||(s.pricing_confirmed===false?"रेट जल्द निर्धारित होगा":`₹${Number(s.base_price||0).toLocaleString("en-IN")}`),
      desc:s.description||"",
      required_documents:Array.isArray(s.required_documents)?s.required_documents:[]
@@ -64,19 +64,37 @@ async function loadServices(){
  }
 }
 
+function serviceIcon(category="", name=""){
+ const n=String(name).toLowerCase(), c=String(category).toLowerCase();
+ if(n.includes("pan")) return "💳";
+ if(n.includes("passport")||n.includes("voter")||n.includes("driving licence")) return "🪪";
+ if(n.includes("certificate")||n.includes("प्रमाण पत्र")) return "📄";
+ if(n.includes("ration")) return "🛒";
+ if(n.includes("pension")) return "🤝";
+ if(n.includes("kisan")||n.includes("किसान")||n.includes("land")||n.includes("खतौनी")) return "🌾";
+ if(n.includes("recharge")||n.includes("बिल")) return "⚡";
+ if(n.includes("print")||n.includes("फोटो")||n.includes("lamination")||n.includes("लैमिनेशन")) return "🖨️";
+ if(n.includes("typing")||n.includes("टाइपिंग")||n.includes("resume")||n.includes("बायोडाटा")) return "⌨️";
+ if(n.includes("gst")||n.includes("udyam")||n.includes("fssai")||n.includes("registration")||n.includes("रजिस्ट्रेशन")) return "🏢";
+ if(n.includes("scholarship")||n.includes("education")||n.includes("शिक्षा")||n.includes("छात्रवृत्ति")) return "🎓";
+ if(c.includes("bank")) return "🏦";
+ if(c.includes("design")) return "🎨";
+ if(c.includes("transport")) return "🚗";
+ return "📋";
+}
 function renderFilters(){
  const cats=["All",...new Set(services.map(s=>s.category))];
- filters.innerHTML=cats.map((c,i)=>`<button class="filter-btn ${i===0?"active":""}" data-filter="${c}">${c}</button>`).join("");
- filters.addEventListener("click",e=>{
+ filters.innerHTML=cats.map((c,i)=>`<button class="filter-btn ${i===0?"active":""}" data-filter="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join("");
+ filters.onclick=e=>{
    const b=e.target.closest("[data-filter]"); if(!b)return;
    document.querySelectorAll(".filter-btn").forEach(x=>x.classList.remove("active")); b.classList.add("active");
    renderServices(b.dataset.filter,search.value);
- });
+ };
 }
 function renderServices(category="All",query=""){
  const q=query.trim().toLowerCase();
  const list=services.filter(s=>(category==="All"||s.category===category)&&(!q||`${s.name} ${s.category} ${s.desc} ${(s.required_documents||[]).join(" ")}`.toLowerCase().includes(q)));
- grid.innerHTML=list.map(s=>`<article class="service-card"><span class="service-icon">${s.icon}</span><h3>${s.name}</h3><p>${s.desc}</p>${s.required_documents?.length?`<p class="service-docs"><strong>आवश्यक दस्तावेज़:</strong> ${s.required_documents.join("، ")}</p>`:""}<div class="service-meta"><span class="price">${s.price}</span><button class="small-btn" data-service="${s.name}">Apply Now</button></div></article>`).join("");
+ grid.innerHTML=list.map(s=>`<article class="service-card"><span class="service-icon">${s.icon}</span><h3>${escapeHtml(s.name)}</h3><p>${escapeHtml(s.desc)}</p>${s.required_documents?.length?`<p class="service-docs"><strong>आवश्यक दस्तावेज़:</strong> ${s.required_documents.map(escapeHtml).join("، ")}</p>`:""}<div class="service-meta"><span class="price">${escapeHtml(s.price)}</span><button class="small-btn" data-service="${escapeHtml(s.name)}">Apply Now</button></div></article>`).join("");
  $("#serviceEmpty").hidden=list.length!==0;
 }
 renderFilters(); renderServices();
