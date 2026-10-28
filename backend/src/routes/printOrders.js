@@ -53,14 +53,14 @@ router.post('/status',async(req,res,next)=>{
   }catch(err){next(err);}
 });
 
-router.get('/',requireAuth,requireRole('ADMIN','ACCOUNT_MANAGER'),async(req,res,next)=>{
+router.get('/',requireAuth,requireRole('ADMIN'),async(req,res,next)=>{
   try{
     const result=await query(`SELECT po.id,po.print_type,po.color_mode,po.copies,po.duplex,po.paper_size,po.paper_type,po.amount,po.payment_status,po.print_status,po.created_at,po.updated_at,a.service_number,a.token_number,a.customer_name,d.original_name FROM print_orders po LEFT JOIN applications a ON a.id=po.application_id LEFT JOIN documents d ON d.id=po.file_id ORDER BY po.created_at DESC LIMIT 200`);
     res.json({ok:true,print_orders:result.rows});
   }catch(err){next(err);}
 });
 
-router.post('/:id/prepare-print',requireAuth,requireRole('ADMIN','ACCOUNT_MANAGER'),async(req,res,next)=>{
+router.post('/:id/prepare-print',requireAuth,requireRole('ADMIN'),async(req,res,next)=>{
   try {
     const r=await query(`SELECT po.id,po.file_id,po.payment_status,po.print_status,po.print_attempts,d.original_name,d.file_type,a.service_number,a.token_number FROM print_orders po JOIN documents d ON d.id=po.file_id JOIN applications a ON a.id=po.application_id WHERE po.id=$1`,[req.params.id]);
     if(!r.rowCount)return res.status(404).json({ok:false,error:'PRINT_ORDER_NOT_FOUND'});
@@ -72,7 +72,7 @@ router.post('/:id/prepare-print',requireAuth,requireRole('ADMIN','ACCOUNT_MANAGE
   } catch(err){next(err);}
 });
 
-router.patch('/:id/status',requireAuth,requireRole('ADMIN','ACCOUNT_MANAGER'),async(req,res,next)=>{
+router.patch('/:id/status',requireAuth,requireRole('ADMIN'),async(req,res,next)=>{
  const status=clean(req.body.print_status,30).toUpperCase(); if(!PRINT_STATUSES.includes(status))return res.status(400).json({ok:false,error:'INVALID_PRINT_STATUS'});
  try{
    const current=await query(`SELECT id,payment_status,print_status FROM print_orders WHERE id=$1`,[req.params.id]);
