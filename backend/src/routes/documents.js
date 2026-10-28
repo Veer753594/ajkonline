@@ -196,7 +196,7 @@ router.post('/', upload.array('files', 15), async (req, res, next) => {
   }
 });
 
-router.get('/application/:applicationId', requireAuth, requireRole('ADMIN', 'ACCOUNT_MANAGER'), async (req, res, next) => {
+router.get('/application/:applicationId', requireAuth, requireRole('ADMIN'), async (req, res, next) => {
   try {
     const result = await query(
       `SELECT id,original_name,document_label,file_type,file_size,review_status,review_note,uploaded_at,reviewed_at
@@ -254,9 +254,9 @@ async function streamDocument(req, res, next) {
   }
 }
 
-router.get('/:id/print', requireAuth, requireRole('ADMIN', 'ACCOUNT_MANAGER'), streamDocument);
+router.get('/:id/print', requireAuth, requireRole('ADMIN'), streamDocument);
 
-router.get('/:id/download', requireAuth, requireRole('ADMIN', 'ACCOUNT_MANAGER'), async (req, res, next) => {
+router.get('/:id/download', requireAuth, requireRole('ADMIN'), async (req, res, next) => {
   try {
     if (!supabase) {
       return res.status(503).json({ ok: false, error: 'STORAGE_NOT_CONFIGURED' });
@@ -298,7 +298,7 @@ router.get('/:id/download', requireAuth, requireRole('ADMIN', 'ACCOUNT_MANAGER')
   }
 });
 
-router.patch('/:id/review', requireAuth, requireRole('ADMIN', 'ACCOUNT_MANAGER'), async (req, res, next) => {
+router.patch('/:id/review', requireAuth, requireRole('ADMIN'), async (req, res, next) => {
   const status = clean(req.body.review_status, 20);
   const note = clean(req.body.review_note, 500);
 
