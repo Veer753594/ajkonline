@@ -55,7 +55,7 @@ router.post('/', async (req, res) => {
   } finally { client.release(); }
 });
 
-router.get('/', requireAuth, requireRole('ADMIN','ACCOUNT_MANAGER'), async (req,res,next)=>{
+router.get('/', requireAuth, requireRole('ADMIN'), async (req,res,next)=>{
   try {
     const status = clean(req.query.status, 30);
     const params=[]; let where='';
@@ -65,7 +65,7 @@ router.get('/', requireAuth, requireRole('ADMIN','ACCOUNT_MANAGER'), async (req,
   } catch(err){next(err);}
 });
 
-router.patch('/:id/status', requireAuth, requireRole('ADMIN','ACCOUNT_MANAGER'), async (req,res,next)=>{
+router.patch('/:id/status', requireAuth, requireRole('ADMIN'), async (req,res,next)=>{
   const status=clean(req.body.status,30); const note=clean(req.body.note,500);
   if(!ALLOWED_STATUSES.includes(status)) return res.status(400).json({ok:false,error:'INVALID_STATUS'});
   const client=await pool.connect();
